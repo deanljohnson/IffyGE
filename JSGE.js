@@ -156,9 +156,9 @@ var JSGE = (function (JSGE) {
 		return Component;
 	}());
 
-	JSGE.ECS.Components = {};
+	JSGE.ECS.COMPONENTS = {};
 
-	JSGE.ECS.Components.Transform = (function(Component, Vector) {
+	JSGE.ECS.COMPONENTS.Transform = (function(Component, Vector) {
 		function Transform() {
 			var that = new Component("Transform"),
 				position = new Vector(0, 0),
@@ -176,7 +176,7 @@ var JSGE = (function (JSGE) {
 		return Transform;
 	}(JSGE.ECS.Component, JSGE.Vector));
 
-	JSGE.ECS.Components.Appearance = (function(Component) {
+	JSGE.ECS.COMPONENTS.Appearance = (function(Component) {
 		function Appearance(imgSrc, x, y, width, height) {
 			var that = new Component("Appearance"),
 				image = new Image();
@@ -195,7 +195,7 @@ var JSGE = (function (JSGE) {
 		return Appearance;
 	}(JSGE.ECS.Component));
 
-	JSGE.ECS.Components.Physics = (function(Component, Vector) {
+	JSGE.ECS.COMPONENTS.Physics = (function(Component, Vector) {
 		function Physics() {
 			var that = new Component("Physics");
 
@@ -208,9 +208,9 @@ var JSGE = (function (JSGE) {
 		return Physics;
 	}(JSGE.ECS.Component, JSGE.Vector));
 
-	JSGE.ECS.SubSystems = {};
+	JSGE.ECS.SYSTEMS = {};
 
-	JSGE.ECS.SubSystems.Renderer = (function() {
+	JSGE.ECS.SYSTEMS.Renderer = (function() {
 		function Renderer(canvas) {
 			var that = {},
 				context = canvas.getContext("2d")
