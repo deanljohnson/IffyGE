@@ -195,6 +195,19 @@ var JSGE = (function (JSGE) {
 		return Appearance;
 	}(JSGE.ECS.Component));
 
+	JSGE.ECS.Components.Physics = (function(Component, Vector) {
+		function Physics() {
+			var that = new Component("Physics");
+
+			that.velocity = new Vector(0, 0);
+			that.mass = 1;
+
+			return that;
+		}
+
+		return Physics;
+	}(JSGE.ECS.Component, JSGE.Vector));
+
 	JSGE.ECS.SubSystems = {};
 
 	JSGE.ECS.SubSystems.Renderer = (function() {
