@@ -103,8 +103,8 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 (function ECSTests() {
 	(function componentTests() {
 		(function transformTests() {
-			var a = new JSGE.ECS.Components.Transform(),
-				b = new JSGE.ECS.Components.Transform();
+			var a = new JSGE.ECS.COMPONENTS.Transform(),
+				b = new JSGE.ECS.COMPONENTS.Transform();
 
 			(function creationTests() {
 				var result = (a.position.x === 0 && a.position.y === 0 && a.origin.x === 0 && a.origin.y === 0 && a.rotation === 0);
@@ -145,7 +145,7 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 		}());
 
 		(function appearanceTests() {
-			var a = new JSGE.ECS.Components.Appearance("Images/Test.png", 0, 0, 10, 10),
+			var a = new JSGE.ECS.COMPONENTS.Appearance("Images/Test.png", 0, 0, 10, 10),
 				result = (a.image.width === 10 && a.image.height === 10 && a.image.srcX === 0 && a.image.srcY === 0);
 
 			if (!result) {
@@ -158,7 +158,7 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 
 	(function entityTests() {
 		var a = new JSGE.ECS.Entity(),
-			comp = new JSGE.ECS.Components.Transform();
+			comp = new JSGE.ECS.COMPONENTS.Transform();
 
 		(function addComponentTest() {
 			a.addComponent(comp);
@@ -189,9 +189,9 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 	(function systemTests() {
 		(function rendererTest() {
 			var e = new JSGE.ECS.Entity(),
-				transform = new JSGE.ECS.Components.Transform(),
-				appearance = new JSGE.ECS.Components.Appearance("Images/Test.png", 0, 0, 10, 10),
-				renderer = new JSGE.ECS.SubSystems.Renderer(document.getElementById("testCanvas"));
+				transform = new JSGE.ECS.COMPONENTS.Transform(),
+				appearance = new JSGE.ECS.COMPONENTS.Appearance("Images/Test.png", 0, 0, 10, 10),
+				renderer = new JSGE.ECS.SYSTEMS.Renderer(document.getElementById("testCanvas"));
 
 			e.addComponent(transform);
 			e.addComponent(appearance);
