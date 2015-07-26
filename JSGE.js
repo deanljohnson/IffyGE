@@ -189,8 +189,6 @@ var JSGE = (function (JSGE) {
 
 			that.image = image;
 
-			//drawImage(image, image.x, image.y, image.width, image.height, -origin.x, -origin.y, (image.width * scale.x), (image.height * scale.y));
-
 			return that;
 		}
 
