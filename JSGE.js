@@ -230,11 +230,14 @@ var JSGE = (function (JSGE) {
 				var entity;
 				for (var e = 0, el = entities.length; e < el; e++) {
 					entity = entities[e];
-					if (entity.components.hasOwnProperty("Appearance") && entity.components.hasOwnProperty("Transform")) {
-						var appearance = entity.components["Appearance"],
-							transform = entity.components["Transform"];
 
-						draw(appearance, transform);
+					if (entity.hasOwnProperty("components")) {
+						if (entity.components.hasOwnProperty("Appearance") && entity.components.hasOwnProperty("Transform")) {
+							var appearance = entity.components["Appearance"],
+								transform = entity.components["Transform"];
+
+							draw(appearance, transform);
+						}
 					}
 				}
 			}
@@ -245,6 +248,44 @@ var JSGE = (function (JSGE) {
 		}
 
 		return Renderer;
+	}());
+
+	JSGE.ECS.SYSTEMS.Physics = (function() {
+		function Physics(gravValue) {
+			var that = {},
+				gravity = gravValue,
+				lastTime = performance.now();
+
+			function timeSinceLastUpdate() {
+				return .1;
+			}
+
+			function update(entities) {
+				var entity, e, el, dt = timeSinceLastUpdate();
+
+				for (e = 0, el = entities.length; e < el; e++) {
+					entity = entities[e];
+
+					if (entity.hasOwnProperty("components")) {
+						if (entity.components.hasOwnProperty("Physics") && entity.components.hasOwnProperty("Transform")) {
+							var physicsComp = entity.components["Physics"],
+								transformComp = entity.components["Transform"],
+								gravAccel = (.5 * gravity * (dt * dt));
+
+							physicsComp.velocity.y += gravAccel;
+							transformComp.rotation = physicsComp.velocity.angle();
+							transformComp.position = transformComp.position.add((physicsComp.velocity.multiply(dt)));
+						}
+					}
+				}
+			}
+
+			that.update = update;
+
+			return that;
+		}
+
+		return Physics;
 	}());
 
 	return JSGE;
