@@ -1,10 +1,12 @@
 (function definitionTest() {
-	console.log("IffyGE is defined: " + (IFFYGE ? true : false).toString());
+	console.log("JSGE is defined: " + (JSGE ? true : false).toString());
 }());
 
+var game = new JSGE.Game(function () {}, function () {}, 60);
+
 (function vectorTests() {
-	var a = new IFFYGE.Vector(1, 0),
-		b = new IFFYGE.Vector(2, 0);
+	var a = new JSGE.Vector(1, 0),
+		b = new JSGE.Vector(2, 0);
 
 	(function creationTest(){
 		var result = (a.x === 1 && a.y === 0 && b.x === 2 && b.y === 0);
@@ -52,7 +54,7 @@
 	}());
 
 	(function divideTest() {
-		var nonZeroA = new IFFYGE.Vector(10, 10),
+		var nonZeroA = new JSGE.Vector(10, 10),
 			c = nonZeroA.divide(2),
 			result = (c.x === 5 && c.y === 5);
 		if (!result) {
@@ -76,6 +78,17 @@
 		}
 	}());
 
+	(function memberwiseAdjustmentTest() {
+		a.x += 5;
+
+		a = a.add(new JSGE.Vector(-5, 0));
+
+		var result = (a.x === 1);
+
+		if (!result) {
+			console.log("Vector memberwise adjustment failed.");
+		}
+	}());
 
 	(function immutabilityTest() {
 		var result = (a.x === 1 && a.y === 0 && b.x === 2 && b.y === 0);
@@ -90,8 +103,8 @@
 (function ECSTests() {
 	(function componentTests() {
 		(function transformTests() {
-			var a = new IFFYGE.ECS.Components.Transform(),
-				b = new IFFYGE.ECS.Components.Transform();
+			var a = new JSGE.ECS.Components.Transform(),
+				b = new JSGE.ECS.Components.Transform();
 
 			(function creationTests() {
 				var result = (a.position.x === 0 && a.position.y === 0 && a.origin.x === 0 && a.origin.y === 0 && a.rotation === 0);
@@ -132,16 +145,20 @@
 		}());
 
 		(function appearanceTests() {
-			var a = new IFFYGE.ECS.Components.Appearance("Images/Test.png", 10, 10);
-			console.log("FINISH APPEARANCE TEST");
+			var a = new JSGE.ECS.Components.Appearance("Images/Test.png", 0, 0, 10, 10),
+				result = (a.image.width === 10 && a.image.height === 10 && a.image.srcX === 0 && a.image.srcY === 0);
+
+			if (!result) {
+				console.log("Components.Appearance tests failed");
+			}
 		}());
 
 		console.log("Component Tests Completed");
 	}());
 
 	(function entityTests() {
-		var a = new IFFYGE.ECS.Entity(),
-			comp = new IFFYGE.ECS.Components.Transform();
+		var a = new JSGE.ECS.Entity(),
+			comp = new JSGE.ECS.Components.Transform();
 
 		(function addComponentTest() {
 			a.addComponent(comp);
@@ -171,20 +188,28 @@
 
 	(function systemTests() {
 		(function rendererTest() {
-			var e = new IFFYGE.ECS.Entity(),
-				transform = new IFFYGE.ECS.Components.Transform(),
-				appearance = new IFFYGE.ECS.Components.Appearance("Images/Test.png", 0, 0, 10, 10),
-				renderer = new IFFYGE.ECS.SubSystems.Renderer(document.getElementById("testCanvas"));
+			var e = new JSGE.ECS.Entity(),
+				transform = new JSGE.ECS.Components.Transform(),
+				appearance = new JSGE.ECS.Components.Appearance("Images/Test.png", 0, 0, 10, 10),
+				renderer = new JSGE.ECS.SubSystems.Renderer(document.getElementById("testCanvas"));
 
 			e.addComponent(transform);
 			e.addComponent(appearance);
 
-			renderer.update([e]);
+			var update = function () {
+				e.components.Transform.position.x += 5;
+				if (e.components.Transform.position.x >= 200) {
+					e.components.Transform.position.x = 50;
+				}
+			};
 
-			e.components.Transform.position.x += 50;
-			e.components.Transform.origin.y += 5;
+			var render = function () {
+				renderer.update([e]);
+			};
 
-			renderer.update([e]);
+			game.setUpdateFunction(update);
+			game.setRenderFunction(render);
+			game.start();
 
 			console.log("Render Test Completed");
 		}());

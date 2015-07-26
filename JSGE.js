@@ -1,14 +1,12 @@
-var IFFYGE = (function (IFFYGE) {
+var JSGE = (function (JSGE) {
 	"use strict";
 
-	IFFYGE.Game = (function() {
+	JSGE.Game = (function() {
 		function Game(updateFunction, renderFunction, updatesPerSecond) {
 			var that = {},
 				updateRate = updatesPerSecond ? (1000 / updatesPerSecond) : (1000 / 60),
 				updateFunc = updateFunction || function(){},
-				renderFunc = renderFunction || function(){},
-				entities = [],
-				systems = [];
+				renderFunc = renderFunction || function(){};
 
 			function update() {
 				updateFunc();
@@ -48,7 +46,7 @@ var IFFYGE = (function (IFFYGE) {
 		return Game;
 	}());
 
-	IFFYGE.Vector = (function() {
+	JSGE.Vector = (function() {
 		function Vector(x, y) {
 			var that = {};
 
@@ -111,9 +109,9 @@ var IFFYGE = (function (IFFYGE) {
 		return Vector;
 	}());
 
-	IFFYGE.ECS = {};
+	JSGE.ECS = {};
 
-	IFFYGE.ECS.Entity = (function() {
+	JSGE.ECS.Entity = (function() {
 		var entityCount = 0;
 
 		function Entity() {
@@ -146,7 +144,7 @@ var IFFYGE = (function (IFFYGE) {
 		return Entity;
 	}());
 
-	IFFYGE.ECS.Component = (function() {
+	JSGE.ECS.Component = (function() {
 		function Component(name) {
 			var that = {};
 
@@ -158,9 +156,9 @@ var IFFYGE = (function (IFFYGE) {
 		return Component;
 	}());
 
-	IFFYGE.ECS.Components = {};
+	JSGE.ECS.Components = {};
 
-	IFFYGE.ECS.Components.Transform = (function(Component, Vector) {
+	JSGE.ECS.Components.Transform = (function(Component, Vector) {
 		function Transform() {
 			var that = new Component("Transform"),
 				position = new Vector(0, 0),
@@ -176,9 +174,9 @@ var IFFYGE = (function (IFFYGE) {
 		}
 
 		return Transform;
-	}(IFFYGE.ECS.Component, IFFYGE.Vector));
+	}(JSGE.ECS.Component, JSGE.Vector));
 
-	IFFYGE.ECS.Components.Appearance = (function(Component) {
+	JSGE.ECS.Components.Appearance = (function(Component) {
 		function Appearance(imgSrc, x, y, width, height) {
 			var that = new Component("Appearance"),
 				image = new Image();
@@ -197,11 +195,11 @@ var IFFYGE = (function (IFFYGE) {
 		}
 
 		return Appearance;
-	}(IFFYGE.ECS.Component));
+	}(JSGE.ECS.Component));
 
-	IFFYGE.ECS.SubSystems = {};
+	JSGE.ECS.SubSystems = {};
 
-	IFFYGE.ECS.SubSystems.Renderer = (function() {
+	JSGE.ECS.SubSystems.Renderer = (function() {
 		function Renderer(canvas) {
 			var that = {},
 				context = canvas.getContext("2d")
@@ -238,5 +236,5 @@ var IFFYGE = (function (IFFYGE) {
 		return Renderer;
 	}());
 
-	return IFFYGE;
-}(IFFYGE || {}));
+	return JSGE;
+}(JSGE || {}));
