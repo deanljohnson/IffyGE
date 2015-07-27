@@ -2,7 +2,7 @@
 	console.log("JSGE is defined: " + (JSGE ? true : false).toString());
 }());
 
-var game = new JSGE.Game(function () {}, function () {}, 60);
+var game = new JSGE.Game(function () {}, function () {}, 60, document.getElementById("testCanvas"));
 
 (function vectorTests() {
 	var a = new JSGE.Vector(1, 0),
@@ -153,6 +153,19 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 			}
 		}());
 
+		(function tagTests() {
+			var tagComp = new JSGE.ECS.COMPONENTS.Tag("a", "b"),
+				result = true;
+
+			result = (tagComp.containsTag("a") && tagComp.containsTag("b")) ? result : false;
+			result = (tagComp.removeTag("a") && !tagComp.containsTag("a")) ? result : false;
+			result = (tagComp.addTag("a") && tagComp.containsTag("a")) ? result : false;
+
+			if (!result) {
+				console.log("COMPONENTS.Tag tests failed");
+			}
+		}());
+
 		console.log("Component Tests Completed");
 	}());
 
@@ -212,6 +225,26 @@ var game = new JSGE.Game(function () {}, function () {}, 60);
 			game.start();
 
 			console.log("Render Test Completed");
+		}());
+
+		(function physicsTest() {
+			var e = new JSGE.ECS.Entity(),
+				transform = new JSGE.ECS.COMPONENTS.Transform(),
+				physicsComp = new JSGE.ECS.COMPONENTS.Physics(),
+				physicsSys = new JSGE.ECS.SYSTEMS.Physics(10);
+
+			e.addComponent(transform);
+			e.addComponent(physicsComp);
+
+			var startingY = e.components.Transform.position.y;
+
+			physicsSys.update([e]);
+
+			var result = (startingY < e.components.Transform.position.y);
+
+			if (!result) {
+				console.log("Physics Gravity Test Failed");
+			}
 		}());
 	}());
 
