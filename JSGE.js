@@ -64,6 +64,50 @@ var JSGE = (function (JSGE) {
 		return Vector;
 	}());
 
+	JSGE.Rect = (function() {
+		function rectIntersection(r1, r2) {
+			var r1MinX = Math.min(r1.x, (r1.x + r1.w)),
+				r1MaxX = Math.max(r1.x, (r1.x + r1.w)),
+				r1MinY = Math.min(r1.y, (r1.y + r1.h)),
+				r1MaxY = Math.max(r1.y, (r1.y + r1.h)),
+				r2MinX = Math.min(r2.x, (r2.x + r2.w)),
+				r2MaxX = Math.max(r2.x, (r2.x + r2.w)),
+				r2MinY = Math.min(r2.y, (r2.y + r2.h)),
+				r2MaxY = Math.max(r2.y, (r2.y + r2.h));
+
+			var interLeft = Math.max(r1MinX, r2MinX),
+				interTop = Math.max(r1MinY, r2MinY),
+				interRight = Math.min(r1MaxX, r2MaxX),
+				interBottom = Math.min(r1MaxY, r2MaxY);
+
+			return (interLeft < interRight) && (interTop < interBottom);
+		}
+
+		function Rect(x, y, w, h) {
+			var that = {};
+
+			function intersects(otherRect) {
+				return rectIntersection(this, otherRect);
+			}
+
+			function contains(x, y) {
+				return (x > this.x && (x < this.x + this.w)) &&
+						(y > this.y && (y < this.y + this.h));
+			}
+
+			that.x = x;
+			that.y = y;
+			that.w = w;
+			that.h = h;
+			that.intersects = intersects;
+			that.contains = contains;
+
+			return that;
+		}
+
+		return Rect;
+	}());
+
 	JSGE.Input = (function(Vector) {
 		function CanvasClick(action, pos) {
 			var that = {};
