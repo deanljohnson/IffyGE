@@ -347,18 +347,18 @@ var JSGE = (function (JSGE) {
 		return Tag;
 	}(JSGE.ECS.Component));
 
-	JSGE.ECS.COMPONENTS.MouseTracker = (function(Component, Vector) {
+	JSGE.ECS.COMPONENTS.MouseTracker = (function(Component) {
 		function MouseTracker() {
 			var that = new Component("MouseTracker");
 
-			that.dirToMouse = new Vector(0, 0);
+			that.dirToMouse = 0;
 			that.distToMouse = 0;
 
 			return that;
 		}
 
 		return MouseTracker;
-	}(JSGE.ECS.Component, JSGE.Vector));
+	}(JSGE.ECS.Component));
 
 	JSGE.ECS.SYSTEMS = {};
 
