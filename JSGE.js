@@ -413,6 +413,29 @@ var JSGE = (function (JSGE) {
 		return MouseTracker;
 	}(JSGE.ECS.Component));
 
+	JSGE.ECS.COMPONENTS.BoxCollider = (function(Component, Rect) {
+		function BoxCollider(x, y, w, h) {
+			var that = new Component("BoxCollider"),
+				rect = new Rect(x, y, w, h);
+
+			function contains(x, y) {
+				return rect.contains(x, y);
+			}
+
+			function intersects(b) {
+				return rect.intersects(b.rect);
+			}
+
+			that.contains = contains;
+			that.intersects = intersects;
+			that.rect = rect;
+
+			return that;
+		}
+
+		return BoxCollider;
+	}(JSGE.ECS.Component, JSGE.Rect));
+
 	JSGE.ECS.SYSTEMS = {};
 
 	JSGE.ECS.SYSTEMS.Renderer = (function() {
