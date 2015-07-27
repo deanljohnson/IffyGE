@@ -1,51 +1,6 @@
 var JSGE = (function (JSGE) {
 	"use strict";
 
-	JSGE.Game = (function() {
-		function Game(updateFunction, renderFunction, updatesPerSecond) {
-			var that = {},
-				updateRate = updatesPerSecond ? (1000 / updatesPerSecond) : (1000 / 60),
-				updateFunc = updateFunction || function(){},
-				renderFunc = renderFunction || function(){};
-
-			function update() {
-				updateFunc();
-				setTimeout(update, updateRate);
-			}
-
-			function render() {
-				renderFunc();
-				requestAnimationFrame(render);
-			}
-
-			function start() {
-				update();
-				render();
-			}
-
-			function setUpdateRate(updatesPerSecond) {
-				updateRate = updatesPerSecond;
-			}
-
-			function setUpdateFunction(updateFunction) {
-				updateFunc = updateFunction;
-			}
-
-			function setRenderFunction(renderFunction) {
-				renderFunc = renderFunction;
-			}
-
-			that.start = start;
-			that.setUpdateRate = setUpdateRate;
-			that.setUpdateFunction = setUpdateFunction;
-			that.setRenderFunction = setRenderFunction;
-
-			return that;
-		}
-
-		return Game;
-	}());
-
 	JSGE.Vector = (function() {
 		function Vector(x, y) {
 			var that = {};
@@ -107,6 +62,126 @@ var JSGE = (function (JSGE) {
 		}
 
 		return Vector;
+	}());
+
+	JSGE.Input = (function(Vector) {
+		function CanvasClick(action, pos) {
+			var that = {};
+
+			that.action = action;
+			that.position = pos;
+
+			return that;
+		}
+
+		function Input(canvas) {
+			var that = {},
+				canvasClicks = [],
+				inputMap = {};
+
+			inputMap["LeftMouse"] = "LeftMouse";
+			inputMap["MiddleMouse"] = "MiddleMouse";
+			inputMap["RightMouse"] = "RightMouse";
+
+			function getCursorPosition(canvas, event) {
+				var rect = canvas.getBoundingClientRect();
+				return new Vector(event.clientX - rect.left, event.clientY - rect.top);
+			}
+
+			canvas.onmouseup = function(e) {
+				var cursorPos = getCursorPosition(canvas, e);
+
+				if (e.button === 0) {
+					canvasClicks.push(new CanvasClick(inputMap["LeftMouse"], cursorPos));
+					e.preventDefault();
+					return false;
+				} else if (e.button === 1) {
+					canvasClicks.push(new CanvasClick(inputMap["MiddleMouse"], cursorPos));
+					e.preventDefault();
+					return false;
+				}
+			};
+
+			canvas.oncontextmenu = function(e) {
+				var cursorPos = getCursorPosition(canvas, e);
+
+				canvasClicks.push(new CanvasClick(inputMap["RightMouse"], cursorPos));
+
+				e.preventDefault();
+				return false;
+			};
+
+			function update() {
+				canvasClicks = [];
+			}
+
+			function getInput(inputString) {
+				var cc, c, cl;
+
+				for (c = 0, cl = canvasClicks.length; c < cl; c++) {
+					cc = canvasClicks[c];
+					if (cc.action === inputString) {
+						return cc;
+					}
+				}
+
+				return false;
+			}
+
+			that.update = update;
+			that.getInput = getInput;
+			that.inputMap = inputMap;
+
+			return that;
+		}
+
+		return Input;
+	}(JSGE.Vector));
+
+	JSGE.Game = (function() {
+		function Game(updateFunction, renderFunction, updatesPerSecond, canvas) {
+			var that = {},
+				updateRate = updatesPerSecond ? (1000 / updatesPerSecond) : (1000 / 60),
+				updateFunc = updateFunction || function(){},
+				renderFunc = renderFunction || function(){};
+
+			function update() {
+				updateFunc();
+				setTimeout(update, updateRate);
+			}
+
+			function render() {
+				renderFunc();
+				requestAnimationFrame(render);
+			}
+
+			function start() {
+				update();
+				render();
+			}
+
+			function setUpdateRate(updatesPerSecond) {
+				updateRate = updatesPerSecond;
+			}
+
+			function setUpdateFunction(updateFunction) {
+				updateFunc = updateFunction;
+			}
+
+			function setRenderFunction(renderFunction) {
+				renderFunc = renderFunction;
+			}
+
+			that.start = start;
+			that.setUpdateRate = setUpdateRate;
+			that.setUpdateFunction = setUpdateFunction;
+			that.setRenderFunction = setRenderFunction;
+			that.input = new JSGE.Input(canvas);
+
+			return that;
+		}
+
+		return Game;
 	}());
 
 	JSGE.ECS = {};
@@ -208,6 +283,70 @@ var JSGE = (function (JSGE) {
 		return Physics;
 	}(JSGE.ECS.Component, JSGE.Vector));
 
+	JSGE.ECS.COMPONENTS.Tag = (function(Component) {
+		function Tag() {
+			var that = new Component("Tag"),
+				tags = [];
+
+			for (var a = 0, al = arguments.length; a < al; a++) {
+				tags.push(arguments[a]);
+			}
+
+			function containsTag(tag) {
+				var currentTag, t, tl;
+
+				for (t = 0, tl = tags.length; t < tl; t++) {
+					currentTag = tags[t];
+					if (currentTag === tag) {
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			function addTag(tag) {
+				var currentTag, t, tl, duplicate = false;
+
+				for (t = 0, tl = tags.length; t < tl; t++) {
+					currentTag = tags[t];
+					if (currentTag === tag) {
+						duplicate = true;
+					}
+				}
+
+				if (!duplicate) {
+					tags.push(tag);
+					return true;
+				}
+
+				return false;
+			}
+
+			function removeTag(tag) {
+				var currentTag, t, tl;
+
+				for (t = 0, tl = tags.length; t < tl; t++) {
+					currentTag = tags[t];
+					if (currentTag === tag) {
+						tags.splice(t, 1);
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			that.containsTag = containsTag;
+			that.addTag = addTag;
+			that.removeTag = removeTag;
+
+			return that;
+		}
+
+		return Tag;
+	}(JSGE.ECS.Component));
+
 	JSGE.ECS.SYSTEMS = {};
 
 	JSGE.ECS.SYSTEMS.Renderer = (function() {
@@ -253,8 +392,8 @@ var JSGE = (function (JSGE) {
 	JSGE.ECS.SYSTEMS.Physics = (function() {
 		function Physics(gravValue) {
 			var that = {},
-				gravity = gravValue,
-				lastTime = performance.now();
+				gravity = gravValue;
+			//lastTime = performance.now();
 
 			function timeSinceLastUpdate() {
 				return .1;
