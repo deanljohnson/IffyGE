@@ -77,7 +77,8 @@ var JSGE = (function (JSGE) {
 		function Input(canvas) {
 			var that = {},
 				canvasClicks = [],
-				inputMap = {};
+				inputMap = {},
+				cursorPos = new Vector(0, 0);
 
 			inputMap["LeftMouse"] = "LeftMouse";
 			inputMap["MiddleMouse"] = "MiddleMouse";
@@ -111,12 +112,20 @@ var JSGE = (function (JSGE) {
 				return false;
 			};
 
+			canvas.addEventListener('mousemove', function(evt) {
+				cursorPos = getCursorPosition(canvas, evt);
+			}, false);
+
 			function update() {
 				canvasClicks = [];
 			}
 
 			function getInput(inputString) {
 				var cc, c, cl;
+
+				if (inputString === "MousePosition") {
+					return cursorPos;
+				}
 
 				for (c = 0, cl = canvasClicks.length; c < cl; c++) {
 					cc = canvasClicks[c];
