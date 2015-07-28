@@ -176,9 +176,9 @@ var game = new JSGE.Game(function () {}, function () {}, 60, document.getElement
 		(function addComponentTest() {
 			a.addComponent(comp);
 
-			var result = a.components[comp.name] ? true : false;
+			var result = a[comp.name] ? true : false;
 
-			delete a.components[comp.name];
+			delete a[comp.name];
 
 			if (!result) {
 				console.log("Entity.addComponent test failed");
@@ -189,7 +189,7 @@ var game = new JSGE.Game(function () {}, function () {}, 60, document.getElement
 			a.addComponent(comp);
 			a.removeComponent(comp.name);
 
-			var result = a.components[comp.name] ? false : true;
+			var result = a[comp.name] ? false : true;
 
 			if (!result) {
 				console.log("Entity.removeComponent test failed");
@@ -210,9 +210,9 @@ var game = new JSGE.Game(function () {}, function () {}, 60, document.getElement
 			e.addComponent(appearance);
 
 			var update = function () {
-				e.components.Transform.position.x += 5;
-				if (e.components.Transform.position.x >= 200) {
-					e.components.Transform.position.x = 50;
+				e.Transform.position.x += 5;
+				if (e.Transform.position.x >= 200) {
+					e.Transform.position.x = 50;
 				}
 			};
 
@@ -236,11 +236,11 @@ var game = new JSGE.Game(function () {}, function () {}, 60, document.getElement
 			e.addComponent(transform);
 			e.addComponent(physicsComp);
 
-			var startingY = e.components.Transform.position.y;
+			var startingY = e.Transform.position.y;
 
 			physicsSys.update([e]);
 
-			var result = (startingY < e.components.Transform.position.y);
+			var result = (startingY < e.Transform.position.y);
 
 			if (!result) {
 				console.log("Physics Gravity Test Failed");

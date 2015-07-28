@@ -243,16 +243,15 @@ var JSGE = (function (JSGE) {
 		var entityCount = 0;
 
 		function Entity() {
-			var that = {},
-				components = {};
+			var that = {};
 
 			function addComponent(component) {
-				components[component.name] = component;
+				this[component.name] = component;
 				return this;
 			}
 
 			function removeComponent(componentName) {
-				delete this.components[componentName];
+				delete this[componentName];
 				return this;
 			}
 
@@ -263,7 +262,6 @@ var JSGE = (function (JSGE) {
 			that.addComponent = addComponent;
 			that.removeComponent = removeComponent;
 			that.print = print;
-			that.components = components;
 			that.id = entityCount++;
 
 			return that;
@@ -288,14 +286,11 @@ var JSGE = (function (JSGE) {
 
 	JSGE.ECS.COMPONENTS.Transform = (function(Component, Vector) {
 		function Transform() {
-			var that = new Component("Transform"),
-				position = new Vector(0, 0),
-				origin = new Vector(0, 0),
-				scale = new Vector(1, 1);
+			var that = new Component("Transform");
 
-			that.origin = origin;
-			that.position = position;
-			that.scale = scale;
+			that.origin = new Vector(0, 0);
+			that.position = new Vector(0, 0);
+			that.scale = new Vector(1, 1);
 			that.rotation = 0;
 
 			return that;
@@ -390,9 +385,14 @@ var JSGE = (function (JSGE) {
 				return false;
 			}
 
+			function getTags() {
+				return tags;
+			}
+
 			that.containsTag = containsTag;
 			that.addTag = addTag;
 			that.removeTag = removeTag;
+			that.getTags = getTags;
 
 			return that;
 		}
@@ -434,14 +434,14 @@ var JSGE = (function (JSGE) {
 		}
 
 		return BoxCollider;
-	}(JSGE.ECS.Component, JSGE.Rect));
+	}(JSGE.ECS.COMPONENTS.Collider, JSGE.Rect));
 
 	JSGE.ECS.SYSTEMS = {};
 
 	JSGE.ECS.SYSTEMS.Renderer = (function() {
 		function Renderer(canvas) {
 			var that = {},
-				context = canvas.getContext("2d")
+				context = canvas.getContext("2d");
 
 			function draw(a, t) {
 				context.save();
@@ -459,13 +459,11 @@ var JSGE = (function (JSGE) {
 				for (var e = 0, el = entities.length; e < el; e++) {
 					entity = entities[e];
 
-					if (entity.hasOwnProperty("components")) {
-						if (entity.components.hasOwnProperty("Appearance") && entity.components.hasOwnProperty("Transform")) {
-							var appearance = entity.components["Appearance"],
-								transform = entity.components["Transform"];
+					if (entity.hasOwnProperty("Appearance") && entity.hasOwnProperty("Transform")) {
+						var appearance = entity.Appearance,
+							transform = entity.Transform;
 
-							draw(appearance, transform);
-						}
+						draw(appearance, transform);
 					}
 				}
 			}
@@ -494,16 +492,14 @@ var JSGE = (function (JSGE) {
 				for (e = 0, el = entities.length; e < el; e++) {
 					entity = entities[e];
 
-					if (entity.hasOwnProperty("components")) {
-						if (entity.components.hasOwnProperty("Physics") && entity.components.hasOwnProperty("Transform")) {
-							var physicsComp = entity.components["Physics"],
-								transformComp = entity.components["Transform"],
-								gravAccel = (.5 * gravity * (dt * dt));
+					if (entity.hasOwnProperty("Physics") && entity.hasOwnProperty("Transform")) {
+						var physicsComp = entity.Physics,
+							transformComp = entity.Transform,
+							gravAccel = (.5 * gravity * (dt * dt));
 
-							physicsComp.velocity.y += gravAccel;
-							transformComp.rotation = physicsComp.velocity.angle();
-							transformComp.position = transformComp.position.add((physicsComp.velocity.multiply(dt)));
-						}
+						physicsComp.velocity.y += gravAccel;
+						transformComp.rotation = physicsComp.velocity.angle();
+						transformComp.position = transformComp.position.add((physicsComp.velocity.multiply(dt)));
 					}
 				}
 			}
