@@ -413,9 +413,58 @@ var JSGE = (function (JSGE) {
 		return MouseTracker;
 	}(JSGE.ECS.Component));
 
-	JSGE.ECS.COMPONENTS.BoxCollider = (function(Component, Rect) {
-		function BoxCollider(x, y, w, h) {
-			var that = new Component("BoxCollider"),
+	JSGE.ECS.COMPONENTS.Collider = (function(Component) {
+		function Collider(typeName, collidesWithTags) {
+			var that = new Component("Collider");
+
+			function collidesWithAny(tags) {
+				var currentTag, otherTag, t, tl, t2, t2l;
+
+				for (t = 0, tl = tags.length; t < tl; t++) {
+					otherTag = tags[t];
+
+					for (t2 = 0, t2l = collidesWithTags.length; t2 < t2l; t2++) {
+						currentTag = collidesWithTags[t2];
+
+						if (currentTag === otherTag) {
+							return true;
+						}
+					}
+				}
+
+
+				return false;
+			}
+
+			that.collidesWithAny = collidesWithAny;
+			that.type = typeName;
+
+			return that;
+		}
+
+		return Collider;
+	}(JSGE.ECS.Component));
+
+	JSGE.ECS.COMPONENTS.PointCollider = (function(Collider, Vector) {
+		function PointCollider(x, y, collidesWithTags) {
+			var that = new Collider("Point", collidesWithTags);
+
+			function isWithin(rect) {
+				return rect.contains(this.position.x, this.position.y);
+			}
+
+			that.isWithin = isWithin;
+			that.position = new Vector(x, y);
+
+			return that;
+		}
+
+		return PointCollider;
+	}(JSGE.ECS.COMPONENTS.Collider, JSGE.Vector));
+
+	JSGE.ECS.COMPONENTS.BoxCollider = (function(Collider, Rect) {
+		function BoxCollider(x, y, w, h, collidesWithTags) {
+			var that = new Collider("Box", collidesWithTags),
 				rect = new Rect(x, y, w, h);
 
 			function contains(x, y) {
@@ -511,6 +560,122 @@ var JSGE = (function (JSGE) {
 
 		return Physics;
 	}());
+
+	JSGE.ECS.SYSTEMS.CollisionDetection = (function(Rect) {
+		function CollisionDetection() {
+			var that = {},
+				collisions = [];
+
+			function postCollision(a, b) {
+				collisions.push({a: a, b: b});
+			}
+
+			function checkBoxBox(aBox, bBox, aTransform, bTransform) {
+				var aRect = new Rect(aBox.rect.x, aBox.rect.y, aBox.rect.w, aBox.rect.h),
+					bRect = new Rect(bBox.rect.x, bBox.rect.y, bBox.rect.w, bBox.rect.h);
+
+				aRect.x += aTransform.position.x;
+				aRect.y += aTransform.position.y;
+				bRect.x += bTransform.position.x;
+				bRect.y += bTransform.position.y;
+
+				return aRect.intersects(bRect);
+			}
+
+			function checkBoxPoint(aBox, bPoint, aTransform, bTransform) {
+				var aRect = new Rect(aBox.rect.x, aBox.rect.y, aBox.rect.w, aBox.rect.h);
+
+				aRect.x += aTransform.position.x - bTransform.position.x;
+				aRect.y += aTransform.position.y - bTransform.position.y;
+
+				return bPoint.isWithin(aRect);
+			}
+
+			function checkCollision(aCollider, bCollider, aTransform, bTransform) {
+				switch (aCollider.type) {
+					case "Box":
+						switch (bCollider.type) {
+							case "Box":
+								return checkBoxBox(aCollider, bCollider, aTransform, bTransform);
+							case "Point":
+								return checkBoxPoint(aCollider, bCollider, aTransform, bTransform);
+							default:
+								console.log("Error while checking collider types");
+								return false;
+						}
+					case "Point":
+						switch (bCollider.type) {
+							case "Box":
+								return checkBoxPoint(bCollider, aCollider, bTransform, aTransform);
+							default:
+								console.log("Error while checking collider types");
+								return false;
+						}
+					default:
+						console.log("Error while checking collider types");
+						return false;
+				}
+			}
+
+			function checkForCollisionBetween(a, b) {
+				if (a.hasOwnProperty("Collider") && b.hasOwnProperty("Collider")) {
+					if (checkCollision(a.Collider, b.Collider, a.Transform, b.Transform)) {
+						postCollision(a, b);
+						return true;
+					}
+				}
+
+				return false;
+			}
+
+			function checkForCollisionsWith(entity, entities) {
+				var otherEntity, e, el, tagComp;
+				for (e = 0, el = entities.length; e < el; e++) {
+					otherEntity = entities[e];
+
+					if (entity === otherEntity) { continue; }
+
+					if (otherEntity.hasOwnProperty("Tag")) {
+						tagComp = otherEntity.Tag;
+
+						if (tagComp.containsTag("Collideable")) {
+							checkForCollisionBetween(entity, otherEntity);
+						}
+					}
+				}
+			}
+
+			function update(entities) {
+				var entity, e, el, tagComp;
+				for (e = 0, el = entities.length; e < el; e++) {
+					entity = entities[e];
+
+					if (entity.hasOwnProperty("Tag")) {
+						tagComp = entity.Tag;
+
+						if (tagComp.containsTag("Collideable")) {
+							checkForCollisionsWith(entity, entities);
+						}
+					}
+				}
+			}
+
+			function popCollision() {
+				if (collisions.length > 0) {
+					return collisions.splice(0, 1)[0];
+				}
+
+				return false;
+			}
+
+			that.update = update;
+			that.popCollision = popCollision;
+
+			return that;
+		}
+
+		return CollisionDetection;
+	}(JSGE.Rect));
 
 	return JSGE;
 }(JSGE || {}));
